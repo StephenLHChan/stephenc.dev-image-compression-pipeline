@@ -92,9 +92,18 @@ export class ImageProcessor {
 
   private async getImageMetadata(imageBuffer: Buffer): Promise<ImageMetadata> {
     const metadata = await sharp(imageBuffer).metadata();
+
+    // Get orientation-corrected dimensions
+    // EXIF orientations 5, 6, 7, 8 require 90/270 degree rotations which swap dimensions
+    const orientation = metadata.orientation || 1;
+    const needsDimensionSwap = orientation >= 5 && orientation <= 8;
+
+    const width = metadata.width || 0;
+    const height = metadata.height || 0;
+
     return {
-      width: metadata.width || 0,
-      height: metadata.height || 0,
+      width: needsDimensionSwap ? height : width,
+      height: needsDimensionSwap ? width : height,
       format: metadata.format || "unknown",
       size: imageBuffer.length,
       quality: this.quality,
@@ -128,6 +137,7 @@ export class ImageProcessor {
     dimensions: { width: number; height: number }
   ): Promise<Buffer> {
     return sharp(imageBuffer)
+      .rotate() // Auto-rotate based on EXIF orientation data
       .resize(dimensions.width, dimensions.height, {
         fit: "inside",
         withoutEnlargement: true,

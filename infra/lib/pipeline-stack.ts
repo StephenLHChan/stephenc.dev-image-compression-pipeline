@@ -59,7 +59,7 @@ export class StephencInfoImageCompressionPipelineStack extends cdk.Stack {
       "CompressImageLambda",
       {
         functionName: "stephenc-dev-compress-image",
-        runtime: lambda.Runtime.NODEJS_20_X,
+        runtime: lambda.Runtime.NODEJS_LATEST,
         handler: "index.handler",
         timeout: cdk.Duration.seconds(60),
         memorySize: 1024,
